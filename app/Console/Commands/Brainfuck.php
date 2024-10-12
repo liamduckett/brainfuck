@@ -43,8 +43,8 @@ class Brainfuck extends Command
 
         $taken = microtime(true) - $started;
 
-        $microseconds = round($taken * 1000);
+        $milliseconds = round($taken * 1000);
 
-        $this->line("Took $microseconds microseconds");
+        $this->line("Took $milliseconds microseconds");
     }
 }
