@@ -10,14 +10,16 @@ class Brainfuck extends Command
     /**
      * @var string
      */
-    protected $signature = 'brainfuck:run';
+    protected $signature = 'brainfuck:run {file}';
 
     public function handle(): int
     {
-        $this->recordTime(function() {
-            $code = $this->read('hello-world.b');
+        $file = $this->argument('file');
+        $code = $this->read($file);
 
+        $this->recordTime(function() use ($code) {
             $machine = new Machine(code: $code);
+
             $output = $machine->execute();
 
             $this->line($output);
