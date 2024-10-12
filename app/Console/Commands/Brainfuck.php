@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Compiler;
 use App\Machine;
 use Illuminate\Console\Command;
 
@@ -16,6 +17,12 @@ class Brainfuck extends Command
     {
         $file = $this->argument('file');
         $code = $this->read($file);
+
+        $compiler = new Compiler($code, $this->output);
+
+        $instructions = $compiler->execute();
+
+        dd($instructions);
 
         $this->recordTime(function() use ($code) {
             $machine = new Machine(code: $code , output: $this->output);
