@@ -14,16 +14,37 @@ class Brainfuck extends Command
 
     public function handle(): int
     {
-        $code = str_split(
-            '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.'
-        );
+        $this->recordTime(function() {
+            $code = $this->read('hello-world.b');
 
-        $machine = new Machine(code: $code);
+            $machine = new Machine(code: $code);
+            $output = $machine->execute();
 
-        $output = $machine->execute();
-
-        $this->line($output);
+            $this->line($output);
+        });
 
         return Command::SUCCESS;
+    }
+
+    protected function read(string $path): array
+    {
+        $path = public_path("/brainfuck/$path");
+        $contents = file_get_contents($path);
+        $contents = trim($contents);
+
+        return str_split($contents);
+    }
+
+    protected function recordTime(callable $callable): void
+    {
+        $started = microtime(true);
+
+        $callable();
+
+        $taken = microtime(true) - $started;
+
+        $microseconds = round($taken * 1000);
+
+        $this->line("Took $microseconds microseconds");
     }
 }
