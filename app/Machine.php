@@ -11,7 +11,7 @@ final class Machine
     protected string $buffer;
 
     public function __construct(
-        protected array $code,
+        protected readonly array $code,
     ) {
         $this->instructionPointer = 0;
         $this->memory = array_fill(0, 30_000, 0);
@@ -23,20 +23,18 @@ final class Machine
     public function execute(): string
     {
         while($this->instructionPointer < count($this->code)) {
-            $instruction = $this->code[$this->instructionPointer];
-
-            match($instruction) {
-                '+' => $this->memory[$this->dataPointer] += 1,
-                '-' => $this->memory[$this->dataPointer] -= 1,
-                '>' => $this->dataPointer += 1,
-                '<' => $this->dataPointer -= 1,
-                ',' => $this->memory[$this->dataPointer] = $this->buffer,
-                '.' => $this->putCharacter(),
+            match($this->currentInstruction()) {
+                '+' => $this->incrementCurrentData(),
+                '-' => $this->decrementCurrentData(),
+                '>' => $this->incrementDataPointer(),
+                '<' => $this->decrementDataPointer(),
+                ',' => $this->readCharacterFromBuffer(),
+                '.' => $this->writeCharacterToBuffer(),
                 '[' => $this->leftBracket(),
                 ']' => $this->rightBracket(),
             };
 
-            $this->instructionPointer += 1;
+            $this->incrementInstructionPointer();
         }
 
         return $this->output;
@@ -44,23 +42,26 @@ final class Machine
 
     // Internals
 
-    protected function putCharacter(): void
+    protected function readCharacterFromBuffer(): void
     {
-        $this->buffer = $this->memory[$this->dataPointer];
-        $this->output .= chr($this->memory[$this->dataPointer]);
+        $this->memory[$this->dataPointer] = $this->buffer;
+    }
+
+    protected function writeCharacterToBuffer(): void
+    {
+        $this->buffer = $this->currentData();
+        $this->output .= chr($this->buffer);
     }
 
     protected function leftBracket(): void
     {
-        if($this->memory[$this->dataPointer] === 0) {
+        if($this->currentData() === 0) {
             $depth = 1;
 
             while($depth !== 0) {
-                $this->instructionPointer += 1;
+                $this->incrementInstructionPointer();
 
-                $instruction = $this->code[$this->instructionPointer];
-
-                match($instruction) {
+                match($this->currentInstruction()) {
                     '[' => $depth += 1,
                     ']' => $depth -= 1,
                     default => null,
@@ -71,20 +72,60 @@ final class Machine
 
     protected function rightBracket(): void
     {
-        if($this->memory[$this->dataPointer] !== 0) {
+        if($this->currentData() !== 0) {
             $depth = 1;
 
             while($depth !== 0) {
-                $this->instructionPointer -= 1;
+                $this->decrementInstructionPointer();
 
-                $instruction = $this->code[$this->instructionPointer];
-
-                match($instruction) {
+                match($this->currentInstruction()) {
                     ']' => $depth += 1,
                     '[' => $depth -= 1,
                     default => null,
                 };
             }
         }
+    }
+
+    // Deep Internals
+
+    protected function currentInstruction(): string
+    {
+        return $this->code[$this->instructionPointer];
+    }
+
+    protected function currentData(): int
+    {
+        return $this->memory[$this->dataPointer];
+    }
+
+    protected function incrementCurrentData(): void
+    {
+        $this->memory[$this->dataPointer] += 1;
+    }
+
+    protected function decrementCurrentData(): void
+    {
+        $this->memory[$this->dataPointer] -= 1;
+    }
+
+    protected function incrementDataPointer(): void
+    {
+        $this->dataPointer += 1;
+    }
+
+    protected function decrementDataPointer(): void
+    {
+        $this->dataPointer -= 1;
+    }
+
+    protected function incrementInstructionPointer(): void
+    {
+        $this->instructionPointer += 1;
+    }
+
+    protected function decrementInstructionPointer(): void
+    {
+        $this->instructionPointer -= 1;
     }
 }
