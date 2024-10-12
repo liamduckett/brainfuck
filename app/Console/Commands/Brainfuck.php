@@ -18,11 +18,9 @@ class Brainfuck extends Command
         $code = $this->read($file);
 
         $this->recordTime(function() use ($code) {
-            $machine = new Machine(code: $code);
+            $machine = new Machine(code: $code , output: $this->output);
 
-            $output = $machine->execute();
-
-            $this->line($output);
+            $machine->execute();
         });
 
         return Command::SUCCESS;

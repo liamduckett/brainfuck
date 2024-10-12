@@ -2,25 +2,26 @@
 
 namespace App;
 
+use Illuminate\Console\OutputStyle;
+
 final class Machine
 {
     protected int $instructionPointer;
     protected array $memory;
     protected int $dataPointer;
-    protected mixed $output;
     protected string $buffer;
 
     public function __construct(
         protected readonly array $code,
+        protected OutputStyle $output,
     ) {
         $this->instructionPointer = 0;
         $this->memory = array_fill(0, 30_000, 0);
         $this->dataPointer = 0;
-        $this->output = '';
         $this->buffer = '';
     }
 
-    public function execute(): string
+    public function execute(): void
     {
         while($this->instructionPointer < count($this->code)) {
             match($this->currentInstruction()) {
@@ -36,8 +37,6 @@ final class Machine
 
             $this->incrementInstructionPointer();
         }
-
-        return $this->output;
     }
 
     // Internals
@@ -50,7 +49,10 @@ final class Machine
     protected function writeCharacterToBuffer(): void
     {
         $this->buffer = $this->currentData();
-        $this->output .= chr($this->buffer);
+
+        $character = chr($this->buffer);
+
+        $this->output->write($character);
     }
 
     protected function leftBracket(): void
