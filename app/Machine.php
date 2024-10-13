@@ -33,7 +33,7 @@ final class Machine
                 InstructionType::DecrementCurrentData => $this->decrementCurrentData($instruction),
                 InstructionType::IncrementDataPointer => $this->incrementDataPointer($instruction),
                 InstructionType::DecrementDataPointer => $this->decrementDataPointer($instruction),
-                InstructionType::ReadCharacterFromBuffer => $this->readCharacterFromBuffer($instruction),
+                InstructionType::ReadCharacterFromBuffer => $this->readCharacterFromBuffer(),
                 InstructionType::WriteCharacterToBuffer => $this->writeCharacterToBuffer($instruction),
                 InstructionType::JumpIfZero => $this->jumpIfZero($instruction),
                 InstructionType::JumpIfNotZero => $this->jumpIfNotZero($instruction),
@@ -45,28 +45,23 @@ final class Machine
 
     // Internals
 
-    protected function readCharacterFromBuffer(Instruction $instruction): void
+    protected function readCharacterFromBuffer(): void
     {
-        foreach(range(1, $instruction->count) as $_) {
-            $this->memory[$this->dataPointer] = $this->buffer;
-        }
+        $this->memory[$this->dataPointer] = $this->buffer;
     }
 
     protected function writeCharacterToBuffer(Instruction $instruction): void
     {
+        $this->buffer = $this->currentData();
+        $character = chr($this->buffer);
+
         foreach(range(1, $instruction->count) as $_) {
-            $this->buffer = $this->currentData();
-
-            $character = chr($this->buffer);
-
             $this->output->write($character);
         }
     }
 
     protected function jumpIfZero(Instruction $instruction): void
     {
-        // MAKE THIS USE ARG
-
         if($this->currentData() === 0) {
             $this->instructionPointer = $instruction->count;
         }
