@@ -2,21 +2,17 @@
 
 namespace App;
 
-use Illuminate\Console\OutputStyle;
-
 class Compiler
 {
     protected array $code;
     protected int $codePointer = 0;
 
     protected array $instructions;
-    protected int $instructionPointer = 0;
 
     protected array $loopStack = [];
 
     public function __construct(
         array $code,
-        protected OutputStyle $output,
     ) {
         $this->code = array_map(
             fn(string $instruction) => InstructionType::from($instruction),

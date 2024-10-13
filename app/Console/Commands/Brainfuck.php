@@ -18,14 +18,12 @@ class Brainfuck extends Command
         $file = $this->argument('file');
         $code = $this->read($file);
 
-        $compiler = new Compiler($code, $this->output);
+        $compiler = new Compiler($code);
 
         $instructions = $compiler->execute();
 
-        dd($instructions);
-
-        $this->recordTime(function() use ($code) {
-            $machine = new Machine(code: $code , output: $this->output);
+        $this->recordTime(function() use ($instructions) {
+            $machine = new Machine(instructions: $instructions , output: $this->output);
 
             $machine->execute();
         });
