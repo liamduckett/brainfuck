@@ -18,9 +18,11 @@ class Brainfuck extends Command
         $file = $this->argument('file');
         $code = $this->read($file);
 
-        $compiler = new Compiler($code);
+        $instructions = $this->recordTime(function() use ($code) {
+            $compiler = new Compiler($code);
 
-        $instructions = $compiler->execute();
+            return $compiler->execute();
+        });
 
         $this->recordTime(function() use ($instructions) {
             $machine = new Machine(instructions: $instructions , output: $this->output);
@@ -40,16 +42,18 @@ class Brainfuck extends Command
         return str_split($contents);
     }
 
-    protected function recordTime(callable $callable): void
+    protected function recordTime(callable $callable): mixed
     {
         $started = microtime(true);
 
-        $callable();
+        $result = $callable();
 
         $taken = microtime(true) - $started;
 
         $milliseconds = round($taken * 1000);
 
         $this->line("Took $milliseconds microseconds");
+
+        return $result;
     }
 }
