@@ -23,7 +23,9 @@ final class Machine
 
     public function execute(): void
     {
-        while($this->instructionPointer < count($this->instructions)) {
+        $instructionCount = count($this->instructions);
+
+        while($this->instructionPointer < $instructionCount) {
             $instruction = $this->currentInstruction();
 
             match($instruction->type) {
